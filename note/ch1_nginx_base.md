@@ -95,3 +95,71 @@
 	}
 
 	```
+	- ngx_table_elt_t 数据结构
+	
+	```
+	typedef struct{		//在Ngx_hash.h 中
+		ngx_uint_t	hash;			//表明ngx_table_elt_t可以是散列表数据结构中的成员
+		ngx_str_t	key;			//键
+		ngx_str_t	value;			//值
+		u_char		*lowcase_key;	//指向全小写的key字符串
+	}ngx_table_elt_t
+	```
+
+	- ngx_buf_t 数据结构
+	
+	```
+	// ngx_buf.h
+	// 处理大数据的关键数据结构，既应用于内存数据，也应用于磁盘数据
+	typedef void *            ngx_buf_tag_t;
+
+	typedef struct ngx_buf_s  ngx_buf_t;
+
+	struct ngx_buf_s {
+    	u_char          *pos;				//从pos 这个位置开始处理内存中的数据
+    	u_char          *last;				//有效内容到此为止
+    	off_t            file_pos;			//将要处理的文件位置
+    	off_t            file_last;			//截止的文件位置
+
+    	u_char          *start;         /* start of buffer */
+    	u_char          *end;           /* end of buffer */
+    	ngx_buf_tag_t    tag;			//当前缓冲区的类型，例如由哪个模块使用就指向这个模块 ngx_module_t 变量的地址
+    	ngx_file_t      *file;			//引用的文件
+    	ngx_buf_t       *shadow;		//当前缓冲区的影子缓冲区，减少转发过程中的开销，这种结构过于复杂
+		
+		/* the buf's content is mmap()ed and must not be changed */
+		unsigned         temporary:1;
+
+    	/*
+     	* the buf's content is in a memory cache or in a read only memory
+     	* and must not be changed
+     	*/
+    	unsigned         memory:1;
+
+    	/* the buf's content is mmap()ed and must not be changed */
+    	unsigned         mmap:1;
+
+    	unsigned         recycled:1;		//为1时表示可回收
+    	unsigned         in_file:1;			//为1时表示缓冲区处理的是文件
+    	unsigned         flush:1;			//为1时表示需要执行flush操作
+    	unsigned         sync:1;			//是否使用同步方式，有些框架代码在sync 为1时，可能会有阻塞，视使用它的模块而定
+    	unsigned         last_buf:1;		//是否是最后一块缓冲区，ngx_buf_t 可以由ngx_chain_t 链表串联起来，为1时，表示是最后一块带处理的缓冲区
+    	unsigned         last_in_chain:1;
+
+    	unsigned         last_shadow:1;
+    	unsigned         temp_file:1;
+
+    	/* STUB */ int   num;
+	};
+	```
+
+	- ngx_chain_t 数据结构
+	```
+	// ngx_chain_t 是与 ngx_buf_t 配合使用的链表数据结构
+	struct ngx_chain_s {
+    	ngx_buf_t    *buf;			\\ 当前缓冲区
+    	ngx_chain_t  *next;			\\ 下一个ngx_chain_t ,如果是最后一个ngx_chain_t, 需要把 next 置为NULL
+	};
+
+	```
+	在向用户发送HTTP 包体时，就需要传入 ngx_chain_t 链表对象，如果是最,那么必须将next 置为NULL，否则永远不会发送成功，而且这个请求将一直不会结束
