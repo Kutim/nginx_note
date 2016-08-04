@@ -410,4 +410,4 @@
 	// 由于其返回类型是 void ,因此，在处理完时必须要主动调用 ngx_http_finalize_request 方法来结束请求
 	```
 	
-	如果不想处理请求中的包体，可以调用 ngx_http_discard_request_body 方法将接受自客户端的 HTTP 包体丢弃掉
+	如果不想处理请求中的包体，可以调用 ngx_http_discard_request_body 方法将接受自客户端的 HTTP 包体丢弃掉，
